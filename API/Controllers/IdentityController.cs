@@ -15,16 +15,35 @@ namespace API.Controllers
 	{
 
 		private readonly UserManager<IdentityUser> _userManager;
+		private readonly SignInManager<IdentityUser> _signInManager;
 
-		public IdentityController(UserManager<IdentityUser>userManager)
+		public IdentityController(UserManager<IdentityUser>userManager,SignInManager<IdentityUser> signInManager)
 		{
 			_userManager = userManager;
+			_signInManager = signInManager;
 		}
 
 		[HttpPost("login")]
-		public IActionResult Login(LoginModel model)
+		public async Task<IActionResult> Login(LoginModel model)
 		{
-			return Ok();
+			var userFromDb = await _userManager.FindByNameAsync(model.Username);
+
+			if (userFromDb == null){
+				return BadRequest();
+			}
+
+			var result = await _signInManager.CheckPasswordSignInAsync(userFromDb,model.Password,false);
+
+			if(!result.Succeeded){
+				return BadRequest();
+			}
+			return Ok(new{
+				result = result,
+				username = userFromDb.UserName,
+				email = userFromDb.Email,
+				token = "Dummy token goes here"
+			});
+
 		}
 		[HttpPost("register")]
 		public async Task<IActionResult> Register(RegisterModel model)
