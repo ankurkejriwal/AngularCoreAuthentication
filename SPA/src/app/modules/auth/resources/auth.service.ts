@@ -29,7 +29,7 @@ export class AuthService {
           this.isLoggedIn = response.result.succeeded;
           this.currentUser.username = user.username;
           this.currentUser.email = user.email;
-
+          localStorage.setItem('token',user.token)
           return this.currentUser;
         }
       })
