@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.ViewModels;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -13,10 +14,11 @@ namespace API.Controllers
 	public class IdentityController : ControllerBase
 	{
 
+		private readonly UserManager<IdentityUser> _userManager;
 
-		public IdentityController()
+		public IdentityController(UserManager<IdentityUser>userManager)
 		{
-
+			_userManager = userManager;
 		}
 
 		[HttpPost("login")]
@@ -24,14 +26,27 @@ namespace API.Controllers
 		{
 			return Ok();
 		}
-
 		[HttpPost("register")]
-		public IActionResult Register(RegisterModel model)
+		public async Task<IActionResult> Register(RegisterModel model)
 		{
-			return Ok();
+
+			var userToCreate = new IdentityUser
+			{
+				Email = model.Email,
+				UserName = model.Username
+			};
+
+			//Create User
+			var result = await _userManager.CreateAsync(userToCreate, model.Password);
+			if (result.Succeeded)
+			{
+				return Ok(result);
+			}
+
+			return BadRequest(result);
 		}
 
-		[HttpPost("confirmemail")]
+        [HttpPost("confirmemail")]
 		public IActionResult ConfirmEmail(ConfirmEmailViewModel model)
 		{
 			return Ok();
