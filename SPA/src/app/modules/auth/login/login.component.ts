@@ -19,14 +19,25 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {}
 
   onSubmit(f: NgForm) {
-    this.alertService.info('Check login information');
+    // this.alertService.info('Check login information');
     this.progressService.startLoading();
-    this.authService.isLoggedIn = true;
 
-    setTimeout(() => {
-      this.progressService.setSuccess();
-      this.progressService.completeLoading();
-      this.alertService.warning('Welcome User');
-    }, 3000);
+    const loginObserver = {
+      next: (x) => {
+        this.progressService.setSuccess();
+        this.alertService.success('Welcome back ' + x.username);
+        this.progressService.completeLoading();
+      },
+      error: (err) => {
+        this.progressService.setFailure();
+        console.log(err);
+        this.alertService.danger('Unable to Login');
+        this.progressService.completeLoading();
+      },
+    };
+
+    this.authService.login(f.value).subscribe(loginObserver);
+    
+
   }
 }
