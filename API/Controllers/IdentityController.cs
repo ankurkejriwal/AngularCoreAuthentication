@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.ViewModels;
+using Core.Services.Token;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -13,12 +14,13 @@ namespace API.Controllers
 	[Route("[controller]")]
 	public class IdentityController : ControllerBase
 	{
-
-		private readonly UserManager<IdentityUser> _userManager;
+        private readonly IJWTTokenGenerator _jwtToken;
+        private readonly UserManager<IdentityUser> _userManager;
 		private readonly SignInManager<IdentityUser> _signInManager;
 
-		public IdentityController(UserManager<IdentityUser>userManager,SignInManager<IdentityUser> signInManager)
+		public IdentityController(UserManager<IdentityUser>userManager,SignInManager<IdentityUser> signInManager, IJWTTokenGenerator jWTToken )
 		{
+			_jwtToken = jWTToken;
 			_userManager = userManager;
 			_signInManager = signInManager;
 		}
@@ -41,7 +43,7 @@ namespace API.Controllers
 				result = result,
 				username = userFromDb.UserName,
 				email = userFromDb.Email,
-				token = "Dummy token goes here"
+				token = _jwtToken.GenerateToken(userFromDb)
 			});
 
 		}
